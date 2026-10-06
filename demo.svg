@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="560" viewBox="0 0 1200 560">
+  <rect width="1200" height="560" fill="#fffdf8"/>
+  <g fill="#192b40" font-family="Georgia,serif">
+    <text x="72" y="73" font-size="32">A space for your annotations</text>
+    <text x="72" y="104" font-size="16" fill="#647080">Demo image · draw a frame, highlight a region, or place a label</text>
+  </g>
+  <g stroke="#a9afb5" stroke-width="1.4">
+    <path d="M100 180H1110 M100 194H1110 M100 208H1110 M100 222H1110 M100 236H1110 M100 330H1110 M100 344H1110 M100 358H1110 M100 372H1110 M100 386H1110"/>
+    <path d="M100 180V236 M355 180V236 M610 180V236 M865 180V236 M1110 180V236 M100 330V386 M355 330V386 M610 330V386 M865 330V386 M1110 330V386"/>
+  </g>
+  <g fill="#283749" stroke="#283749" stroke-width="2.3">
+    <ellipse cx="172" cy="222" rx="10" ry="6" transform="rotate(-18 172 222)"/><path d="M181 220V173"/>
+    <ellipse cx="236" cy="208" rx="10" ry="6" transform="rotate(-18 236 208)"/><path d="M245 206V159"/>
+    <ellipse cx="300" cy="194" rx="10" ry="6" transform="rotate(-18 300 194)"/><path d="M309 192V145"/>
+    <ellipse cx="428" cy="180" rx="10" ry="6" transform="rotate(-18 428 180)"/><path d="M419 182V228"/>
+    <ellipse cx="492" cy="194" rx="10" ry="6" transform="rotate(-18 492 194)"/><path d="M483 196V242"/>
+    <ellipse cx="556" cy="208" rx="10" ry="6" transform="rotate(-18 556 208)"/><path d="M547 210V256"/>
+    <ellipse cx="683" cy="222" rx="10" ry="6" transform="rotate(-18 683 222)"/><path d="M692 220V173"/>
+    <ellipse cx="747" cy="208" rx="10" ry="6" transform="rotate(-18 747 208)"/><path d="M756 206V159"/>
+    <ellipse cx="811" cy="194" rx="10" ry="6" transform="rotate(-18 811 194)"/><path d="M820 192V145"/>
+    <ellipse cx="940" cy="208" rx="10" ry="6" transform="rotate(-18 940 208)"/><path d="M949 206V159"/>
+    <ellipse cx="1040" cy="208" rx="12" ry="7" fill="#fffdf8"/><path d="M1051 206V159"/>
+    <ellipse cx="172" cy="372" rx="10" ry="6" transform="rotate(-18 172 372)"/><path d="M181 370V323"/>
+    <ellipse cx="299" cy="358" rx="10" ry="6" transform="rotate(-18 299 358)"/><path d="M308 356V309"/>
+    <ellipse cx="428" cy="344" rx="10" ry="6" transform="rotate(-18 428 344)"/><path d="M437 342V295"/>
+    <ellipse cx="555" cy="330" rx="10" ry="6" transform="rotate(-18 555 330)"/><path d="M546 332V378"/>
+    <ellipse cx="683" cy="344" rx="10" ry="6" transform="rotate(-18 683 344)"/><path d="M674 346V392"/>
+    <ellipse cx="810" cy="358" rx="10" ry="6" transform="rotate(-18 810 358)"/><path d="M801 360V406"/>
+    <ellipse cx="988" cy="372" rx="12" ry="7" fill="#fffdf8"/><path d="M999 370V323"/>
+  </g>
+  <g fill="#647080" font-family="system-ui,sans-serif" font-size="14">
+    <text x="72" y="492">Replace this demo with the exact image used in Overleaf.</text>
+    <text x="72" y="519">Coordinates stay the same at every display size: (0,0) top-left → (1,1) bottom-right.</text>
+  </g>
+</svg>

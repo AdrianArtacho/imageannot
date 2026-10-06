@@ -1,0 +1,526 @@
+%------DEPENDENCIES------
+% \usepackage{tikz}
+% \usepackage{graphicx}
+% \usepackage{xparse}
+%------------------------
+
+%----SHOWCOORDS
+
+\newcommand{\showcoords}{
+\draw[step=0.1,gray!30,very thin] (0,0) grid (1,1);
+\draw[step=0.5,gray!70,thin] (0,0) grid (1,1);
+
+\foreach \x in {0,0.1,...,1}
+  \node[below,scale=0.5] at (\x,0) {\x};
+
+\foreach \y in {0,0.1,...,1}
+  \node[left,scale=0.5] at (0,\y) {\y};
+}
+
+% \newcommand{\showcoords}{
+% \draw[step=0.1,gray!40,very thin] (0,0) grid (1,1);
+
+% \foreach \x in {0,0.1,...,1}
+%   \draw[gray] (\x,0) -- (\x,-0.02) node[below,scale=0.5] {\x};
+
+% \foreach \y in {0,0.1,...,1}
+%   \draw[gray] (0,\y) -- (-0.02,\y) node[left,scale=0.5] {\y};
+% }
+
+%---\coordprobe
+\newcommand{\coordprobe}{
+\draw[step=0.1,gray!30,very thin] (0,0) grid (1,1);
+
+\foreach \x in {0,0.1,...,1}
+  \node[below,scale=0.5] at (\x,0) {\x};
+
+\foreach \y in {0,0.1,...,1}
+  \node[left,scale=0.5] at (0,\y) {\y};
+
+\path
+(0,0)
+coordinate[pos=0] (dummy);
+
+\foreach \p in {(0,0)}{
+\node[opacity=0] at \p {};
+}
+}
+
+%----\crosshair
+
+\newcommand{\crosshair}[2]{
+\draw[red] (#1-0.01,#2) -- (#1+0.01,#2);
+\draw[red] (#1,#2-0.01) -- (#1,#2+0.01);
+\node[above right,scale=0.6] at (#1,#2) {(#1,#2)};
+}
+
+%-----\imageannot
+
+\newcommand{\imageannot}[2]{
+\begin{tikzpicture}
+
+\node[anchor=north west,inner sep=0] (img)
+{\includegraphics[width=\textwidth]{#1}};
+
+\begin{scope}
+[x={(img.north east)},y={(img.south west)}]
+
+#2
+
+\end{scope}
+
+\end{tikzpicture}
+}
+
+\newcommand{\imageannotdebug}[2]{
+\begin{tikzpicture}
+
+\node[anchor=north west,inner sep=0] (img)
+{\includegraphics[width=\textwidth]{#1}};
+
+\begin{scope}
+[x={(img.north east)},y={(img.south west)}]
+
+\showcoords
+
+#2
+
+\end{scope}
+
+\end{tikzpicture}
+}
+
+
+\newcommand{\highlightfrag}[5][yellow]{
+\fill[#1,opacity=0.35]
+(#2,#3) rectangle (#4,#5);
+
+\draw[#1,line width=0pt]
+(#2,#3) rectangle (#4,#5);
+}
+
+\let\highlightmove\highlightfrag
+
+% \newcommand{\imageannot}[3][false]{
+% \begin{tikzpicture}
+
+% \node[anchor=north west,inner sep=0] (img)
+% {\includegraphics[width=\textwidth]{#2}};
+
+% \begin{scope}
+% [x={(img.north east)},y={(img.south west)}]
+
+% \ifx#1true
+% \showcoords
+% \fi
+
+% #3
+
+% \end{scope}
+
+% \end{tikzpicture}
+% }
+
+% \newcommand{\imageannot}[2]{
+% \begin{tikzpicture}
+% \node[anchor=north west,inner sep=0] (img)
+% {\includegraphics[width=\textwidth]{#1}};
+
+% \begin{scope}
+% [x={(img.north east)},y={(img.south west)}]
+
+% #2
+
+% \end{scope}
+% \end{tikzpicture}
+% }
+
+% \newcommand{\imageannot}[2]{
+% \begin{tikzpicture}
+% \node[anchor=south west,inner sep=0] (img) at (0,0)
+% {\includegraphics[width=\textwidth]{#1}};
+
+% \begin{scope}[x={(img.south east)},y={(img.north west)}]
+% #2
+% \end{scope}
+
+% \end{tikzpicture}
+% }
+
+%---\circlefrag{}{}{}
+
+% \newcommand{\circlefrag}[3]{
+% \draw[red, line width=2pt] (#1,#2) circle (#3);
+% }
+
+%------ellipsefrag
+
+\NewDocumentCommand{\ellipsefrag}{O{red} O{0} m m m m}{
+\draw[#1,line width=1.5pt,
+      rotate around={#2:({(#3+#5)/2},{(#4+#6)/2})}]
+({(#3+#5)/2},{(#4+#6)/2})
+ellipse
+({(#5-#3)/2} and {(#6-#4)/2});
+}
+
+% \newcommand{\ellipsefrag}[5][red]{
+% \draw[#1,line width=2pt]
+% ({(#2+#4)/2},{(#3+#5)/2})
+% ellipse
+% ({(#4-#2)/2} and {(#5-#3)/2});
+% }
+
+% \newcommand{\ellipsefrag}[4]{
+% \draw[red,line width=2pt]
+% ({(#1+#3)/2},{(#2+#4)/2})
+% ellipse
+% ({(#3-#1)/2} and {(#4-#2)/2});
+% }
+
+%------ovalfrag
+
+\NewDocumentCommand{\ovalfrag}{O{blue} O{0} O{0.2} m m m m}{
+\fill[draw=none,#1,fill opacity=#3,
+      rotate around={#2:({(#4+#6)/2},{(#5+#7)/2})}]
+({(#4+#6)/2},{(#5+#7)/2})
+ellipse
+({(#6-#4)/2} and {(#7-#5)/2});
+}
+
+% \NewDocumentCommand{\ovalfrag}{O{blue} O{0} O{0.2} m m m m}{
+% \fill[#1,fill opacity=#3,
+%       rotate around={#2:({(#4+#6)/2},{(#5+#7)/2})}]
+% ({(#4+#6)/2},{(#5+#7)/2})
+% ellipse
+% ({(#6-#4)/2} and {(#7-#5)/2});
+% }
+
+% \NewDocumentCommand{\ovalfrag}{O{red!20} O{0} m m m m}{
+% \fill[#1,
+%       rotate around={#2:({(#3+#5)/2},{(#4+#6)/2})}]
+% ({(#3+#5)/2},{(#4+#6)/2})
+% ellipse
+% ({(#5-#3)/2} and {(#6-#4)/2});
+% }
+
+% \NewDocumentCommand{\ovalfrag}{O{red} O{0} m m m m}{
+% \fill[#1,
+%       rotate around={#2:({(#3+#5)/2},{(#4+#6)/2})}]
+% ({(#3+#5)/2},{(#4+#6)/2})
+% ellipse
+% ({(#5-#3)/2} and {(#6-#4)/2});
+% }
+
+%----rectfrag{}{}{}{}
+
+\NewDocumentCommand{\rectfrag}{O{red} O{0} m m m m}{
+\draw[#1,line width=1.0pt,rounded corners=3pt,
+      rotate around={#2:({(#3+#5)/2},{(#4+#6)/2})}]
+(#3,#4) rectangle (#5,#6);
+}
+
+% \newcommand{\rectfrag}[5][red]{
+% \draw[#1,line width=1.5pt,rounded corners=3pt]
+% (#2,#3) rectangle (#4,#5);
+% }
+
+% \newcommand{\rectfrag}[5][red]{
+% \draw[#1,line width=2pt,rounded corners=3pt]
+% (#2,#3) rectangle (#4,#5);
+% }
+
+% \newcommand{\rectfrag}[4]{
+% \draw[red,line width=2pt,rounded corners=3pt]
+% (#1,#2) rectangle (#3,#4);
+% }
+
+% \newcommand{\rectfrag}[4]{
+% \draw[red,line width=2pt] (#1,#2) rectangle (#3,#4);
+% }
+
+%---\arrowfrag{}{}{}{}
+
+% \newcommand{\arrowfrag}[4]{
+% \draw[red,line width=2pt,->]
+% (#1,#2) -- (#3,#4);
+% }
+
+\NewDocumentCommand{\arrowfrag}{O{red} m m m m}{
+\draw[#1,line width=2pt,-{Latex[length=4mm]}]
+(#2,#3) -- (#4,#5);
+}
+
+% \newcommand{\arrowfrag}[4]{
+% \draw[red,line width=2pt,-{Latex[length=4mm]}]
+% (#1,#2) -- (#3,#4);
+% }
+
+%---\textfrag
+
+\newcommand{\textfrag}[5][black]{
+\node[#1,anchor=center,scale=#4,inner sep=0pt] at (#2,#3) {#5};
+}
+
+% \newcommand{\textfrag}[5][black]{
+% \node[#1,anchor=center,scale=#4,inner sep=0pt] at (#2,#3) {#5};
+% }
+
+% \newcommand{\textfrag}[5][black]{
+% \node[#1,anchor=north west,scale=#4] at (#2,#3) {#5};
+% }
+
+% \newcommand{\textfrag}[4]{
+% \node[red,anchor=north west,scale=#3] at (#1,#2) {#4};
+% }
+
+%---\markerfrag
+
+
+
+\newcommand{\markerfrag}[4][red]{
+\node[
+circle,
+draw=#1,
+fill=white,
+line width=1.5pt,
+inner sep=1.5pt,
+font=\bfseries\small,
+text=#1
+] at (#2,#3) {#4};
+}
+
+\newcommand{\markerfragdark}[4][red]{
+\node[
+circle,
+fill=#1,
+text=white,
+font=\bfseries\small,
+inner sep=1.8pt
+] at (#2,#3) {#4};
+}
+
+%---------
+% \usetikzlibrary{calc}
+
+\newcommand{\rulefrag}[5][black]{%
+  % main line
+  \draw[#1] (#2,#3) -- (#4,#5);
+  % first end cap
+  \draw[#1]
+    ($ (#2,#3)!0.08cm!90:(#4,#5) $) --
+    ($ (#2,#3)!0.08cm!-90:(#4,#5) $);
+  % second end cap
+  \draw[#1]
+    ($ (#4,#5)!0.08cm!90:(#2,#3) $) --
+    ($ (#4,#5)!0.08cm!-90:(#2,#3) $);
+}
+
+%-----
+
+\newlength{\pinwidth}
+
+\newcommand{\pinfrag}[5][0]{%
+\pgfmathsetlength{\pinwidth}{#4*0.9cm}%
+\node[anchor=center,inner sep=0pt] at (#2,#3)
+{\includegraphics[width=\pinwidth,angle=#1]{#5}};
+}
+
+% \newcommand{\pinfrag}[5][0]{%
+% \node[anchor=center,inner sep=0pt] at (#2,#3)
+% {\includegraphics[width=\dimexpr#4*0.9cm\relax,angle=#1]{#5}};
+% }
+
+% \newcommand{\pinfrag}[5][0]{%
+% \node[anchor=center] at (#2,#3)
+% {\includegraphics[width=#4*0.9cm,angle=#1]{#5}};
+% }
+
+% \newcommand{\pinfrag}[5][0]{
+% \node[
+%     anchor=center,
+%     rotate=#1,
+%     scale=#4
+% ] at (#2,#3)
+% {\includegraphics{#5}};
+% }
+
+% \newcommand{\pinfrag}[5][0]{
+% \node[anchor=center] at (#2,#3)
+% {\includegraphics[scale=#4,angle=#1]{#5}};
+% }
+
+
+%--usage---
+
+% \rulefrag[red]{0.2}{0.3}{0.8}{0.3}
+
+%---- USAGE ----
+% \imageannot{analysis.png}{
+%   \circlefrag{0.25}{0.70}{0.05}
+%   \circlefrag{0.55}{0.35}{0.08}
+% }
+
+% DEBUG MODE
+% \imageannot[true]{analysis.png}{
+% }
+
+%===========================================================
+% EXAMPLE USAGE / CHEAT SHEET
+% (All examples commented out – purely for documentation)
+%===========================================================
+
+%-----------------------------------------------------------
+% BASIC IMAGE ANNOTATION
+%-----------------------------------------------------------
+% Places an image and allows drawing annotations in normalized
+% coordinates (0–1 horizontally and vertically).
+%
+% \imageannot{path/to/image.png}{
+%   % annotation commands go here
+% }
+
+% Example:
+% \imageannot{analysis.png}{
+%   \rectfrag{0.2}{0.3}{0.5}{0.6}
+% }
+
+%-----------------------------------------------------------
+% DEBUG MODE WITH COORDINATE GRID
+%-----------------------------------------------------------
+% Shows a grid with coordinates so you can measure where
+% to place annotations.
+
+% \imageannotdebug{analysis.png}{
+% }
+
+% You can also manually show the coordinate grid:
+%
+% \imageannot{analysis.png}{
+%   \showcoords
+% }
+
+%-----------------------------------------------------------
+% HIGHLIGHT RECTANGLE
+%-----------------------------------------------------------
+% Semi-transparent highlight box.
+%
+% Syntax:
+% \highlightfrag[color]{x1}{y1}{x2}{y2}
+%
+% Default color: yellow
+
+% Example:
+% \imageannot{analysis.png}{
+%   \highlightfrag{0.2}{0.3}{0.6}{0.5}
+% }
+
+% Custom color:
+% \imageannot{analysis.png}{
+%   \highlightfrag[green]{0.2}{0.3}{0.6}{0.5}
+% }
+
+% highlightmove is currently an alias:
+%
+% \highlightmove{0.2}{0.3}{0.6}{0.5}
+
+%-----------------------------------------------------------
+% RECTANGLE FRAME
+%-----------------------------------------------------------
+% Draws a red rounded rectangle.
+
+% \imageannot{analysis.png}{
+%   \rectfrag{0.2}{0.3}{0.6}{0.5}
+% }
+
+%-----------------------------------------------------------
+% ELLIPSE / CIRCLE HIGHLIGHT
+%-----------------------------------------------------------
+% Draws an ellipse that fits inside the rectangle defined
+% by two points.
+
+% \imageannot{analysis.png}{
+%   \ellipsefrag{0.3}{0.4}{0.6}{0.7}
+% }
+
+%-----------------------------------------------------------
+% ARROW
+%-----------------------------------------------------------
+% Draws an arrow from one coordinate to another.
+
+% \imageannot{analysis.png}{
+%   \arrowfrag{0.2}{0.2}{0.5}{0.5}
+% }
+
+%-----------------------------------------------------------
+% TEXT LABEL
+%-----------------------------------------------------------
+% Places text on the image.
+%
+% Syntax:
+% \textfrag{x}{y}{scale}{text}
+
+% \imageannot{analysis.png}{
+%   \textfrag{0.3}{0.8}{1}{Important motif}
+% }
+
+%-----------------------------------------------------------
+% MARKERS (NUMBERED CIRCLES)
+%-----------------------------------------------------------
+% White circle with red outline.
+
+% \imageannot{analysis.png}{
+%   \markerfrag{0.2}{0.7}{1}
+%   \markerfrag{0.5}{0.4}{2}
+% }
+
+% Filled red circle with white text.
+
+% \imageannot{analysis.png}{
+%   \markerfragdark{0.2}{0.7}{A}
+% }
+
+%-----------------------------------------------------------
+% CROSSHAIR FOR PRECISE COORDINATES
+%-----------------------------------------------------------
+% Draws a small crosshair and prints the coordinate.
+
+% \imageannot{analysis.png}{
+%   \crosshair{0.5}{0.5}
+% }
+
+%-----------------------------------------------------------
+% MULTIPLE ANNOTATIONS TOGETHER
+%-----------------------------------------------------------
+% \imageannot{analysis.png}{
+%   \highlightfrag{0.2}{0.3}{0.6}{0.5}
+%   \arrowfrag{0.7}{0.7}{0.5}{0.5}
+%   \textfrag{0.65}{0.75}{0.8}{Cadence}
+%   \markerfrag{0.2}{0.3}{1}
+% }
+
+%-----------------------------------------------------------
+% WORKFLOW TIP
+%-----------------------------------------------------------
+% 1. Use \imageannotdebug to see coordinates.
+% 2. Note positions you want.
+% 3. Replace with \imageannot and annotations.
+%-----------------------------------------------------------
+
+\newcommand{\parafrag}[5][\normalsize]{%
+  \node[
+    anchor=north west,
+    text width=#4\textwidth,
+    align=left
+  ] at (#2,#3) {{#1 #5}};
+}
+
+\tikzset{
+  whiteout/.style={fill=white, draw=none, opacity=1}
+}
+
+\renewcommand{\highlightfrag}[5][yellow]{%
+  \path[fill, draw, line width=0pt, fill opacity=0.35, #1]
+    (#2,#3) rectangle (#4,#5);
+}
+
+\let\highlightmove\highlightfrag
