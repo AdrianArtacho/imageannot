@@ -1,0 +1,53 @@
+name: Validate notation UI integration
+on:
+  push:
+    branches: [feature/music-notation]
+    paths:
+      - '.integrate-notation.py'
+      - '.github/workflows/integrate-notation.yml'
+permissions:
+  contents: write
+jobs:
+  integrate:
+    if: github.ref == 'refs/heads/feature/music-notation'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply anchored UI changes
+        run: python3 .integrate-notation.py
+      - name: Syntax and unit tests
+        run: |
+          node --check app.js
+          node --check notation.js
+          npm test
+      - name: Install isolated browser test dependencies
+        run: |
+          npm install --no-save --package-lock=false playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Existing and notation browser regressions
+        run: |
+          node tests/browser.mjs
+          node tests/notation.browser.mjs
+      - name: Commit validated app changes to feature branch only
+        run: |
+          git add app.js index.html styles.css README.md package.json
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Integrate portable music-notation controls and live annotation previews'
+          git push origin HEAD:feature/music-notation
+      - name: Source and browser verification artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: notation-ui-verification
+          retention-days: 1
+          path: |
+            *.js
+            *.css
+            *.html
+            *.json
+            *.md
+            *.svg
+            tests/
+            test-results/
