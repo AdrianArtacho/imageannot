@@ -1,4 +1,5 @@
 import { TOOLS, makeAnnotation, generateLine, generateBlock, pointFromClient } from './core.js';
+import { INSERTIONS, insertNotation, previewNotation } from './notation.js';
 
 const $ = (id) => document.getElementById(id);
 const svgNS = 'http://www.w3.org/2000/svg';
@@ -88,6 +89,7 @@ function updateInspector(annotation = null) {
   $('width-input').value = options.width ?? .3;
   $('pin-path-input').value = options.pinPath || 'pin.png';
   $('font-size-input').value = (options.fontSize || '\\normalsize').replace(/^\\/, '');
+  updateNotationPreview();
   $('tool-help').textContent = id === 'parafrag'
     ? 'Drag a box: the upper-left corner places the paragraph; its width sets the text width. Height is determined by your text in LaTeX.'
     : id === 'whiteout'
@@ -127,6 +129,51 @@ function previewColor(expression) {
     rgb = rgb.map((channel, n) => Math.round(channel * amount + other[n] * (1 - amount)));
   }
   return `rgb(${rgb.join(',')})`;
+}
+
+// The notation renderer escapes user input and emits only its own fixed markup.
+// Do not assign annotation.text directly to innerHTML.
+function updateNotationPreview() {
+  const rendered = previewNotation($('text-input').value, $('raw-latex').checked);
+  $('notation-preview').innerHTML = rendered.html || '<span class="notation-empty">Label preview</span>';
+  $('notation-warning').textContent = rendered.warnings.join(' ');
+  $('notation-warning').hidden = rendered.warnings.length === 0;
+}
+
+// Measure formatted labels rather than raw command length (e.g. \msup{7}).
+// Cache geometry so moving the pointer does not repeatedly measure every label.
+const labelMetrics = new Map();
+function richLabel(annotation, { x, y, fontSize, color, bold = false, width = null }) {
+  const rendered = previewNotation(annotation.text, annotation.rawLatex);
+  const div = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
+  div.className = 'notation-render annotation-label';
+  div.style.fontSize = `${fontSize}px`;
+  div.style.fontWeight = bold ? '700' : '400';
+  div.style.color = color;
+  div.style.textAlign = width === null ? 'center' : 'left';
+  div.style.width = width === null ? 'max-content' : `${width}px`;
+  div.innerHTML = rendered.html;
+  const key = JSON.stringify([annotation.text, annotation.rawLatex, fontSize, bold, width]);
+  let size = labelMetrics.get(key);
+  if (!size) {
+    div.style.position = 'fixed'; div.style.left = '-100000px'; div.style.top = '0';
+    div.style.visibility = 'hidden';
+    document.body.append(div);
+    const bounds = div.getBoundingClientRect();
+    size = { width: Math.max(1, Math.ceil(bounds.width)), height: Math.max(1, Math.ceil(bounds.height)) };
+    div.remove();
+    div.style.position = ''; div.style.left = ''; div.style.top = ''; div.style.visibility = '';
+    if (labelMetrics.size >= 200) labelMetrics.clear();
+    labelMetrics.set(key, size);
+  }
+  const foreign = svgElement('foreignObject', {
+    x: width === null ? x - size.width / 2 : x,
+    y: width === null ? y - size.height / 2 : y,
+    width: size.width, height: size.height,
+    class: 'annotation-rich-label',
+  });
+  foreign.append(div);
+  return { element: foreign, ...size };
 }
 
 function renderShape(annotation, draft = false) {
@@ -178,25 +225,26 @@ function renderShape(annotation, draft = false) {
     }
     case 'markerfrag':
     case 'markerfragdark': {
-      const radius = Math.max(13, String(annotation.text).length * 5 + 6) * scale;
+      const label = richLabel(annotation, { x, y, fontSize: 15 * scale, bold: true,
+        color: annotation.tool === 'markerfragdark' ? 'white' : color });
+      const radius = Math.max(13 * scale, Math.hypot(label.width, label.height) / 2 + 3 * scale);
       group.append(svgElement('circle', { cx: x, cy: y, r: radius,
         fill: annotation.tool === 'markerfragdark' ? color : 'white', stroke: color, 'stroke-width': stroke }));
-      shape = svgElement('text', { x, y, fill: annotation.tool === 'markerfragdark' ? 'white' : color,
-        'font-size': 15 * scale, 'font-weight': 700, 'text-anchor': 'middle', 'dominant-baseline': 'central' }, annotation.text);
+      shape = label.element;
       break;
     }
     case 'textfrag':
-      shape = svgElement('text', { x, y, fill: color, 'font-size': 20 * scale * annotation.scale,
-        'text-anchor': 'middle', 'dominant-baseline': 'central' }, annotation.text);
+      shape = richLabel(annotation, { x, y, color, fontSize: 20 * scale * annotation.scale }).element;
       break;
     case 'parafrag': {
-      group.append(svgElement('rect', { x, y, width: annotation.width * width, height: Math.max(boxHeight, 40 * scale),
+      const sizes = { tiny: .5, scriptsize: .7, footnotesize: .8, small: .9,
+        normalsize: 1, large: 1.2, Large: 1.44, LARGE: 1.728, huge: 2.074, Huge: 2.488 };
+      const name = String(annotation.fontSize).replace(/^\\/, '');
+      const label = richLabel(annotation, { x, y, color: '#1b2e45',
+        fontSize: 17 * scale * (sizes[name] || 1), width: annotation.width * width });
+      group.append(svgElement('rect', { x, y, width: annotation.width * width, height: Math.max(boxHeight, label.height),
         fill: 'white', 'fill-opacity': .65, stroke: '#667b91', 'stroke-dasharray': `${4 * scale} ${4 * scale}`, 'stroke-width': scale }));
-      const foreign = svgElement('foreignObject', { x, y, width: annotation.width * width, height: Math.max(boxHeight, 40 * scale) });
-      const text = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
-      text.style.cssText = `font: ${17 * scale}px Georgia,serif;color:#1b2e45;white-space:pre-wrap;overflow-wrap:anywhere;padding:4px;`;
-      text.textContent = annotation.text;
-      foreign.append(text); shape = foreign;
+      shape = label.element;
       break;
     }
     case 'crosshair':
@@ -242,7 +290,13 @@ function renderOverlay() {
     }
     overlay.append(grid);
   }
-  state.annotations.forEach((annotation) => overlay.append(renderShape(annotation)));
+  state.annotations.forEach((annotation) => {
+    // Live typing previews the selected label without creating an undo entry
+    // on each keystroke. The normal change/blur handler commits the edit.
+    const shown = annotation.id === state.selected && tool(annotation.tool).supportsText
+      ? { ...annotation, text: $('text-input').value, rawLatex: $('raw-latex').checked } : annotation;
+    overlay.append(renderShape(shown));
+  });
   if (state.drag) overlay.append(renderShape(makeDraft(), true));
 }
 
@@ -404,6 +458,32 @@ document.querySelectorAll('[data-field] input, [data-field] textarea, [data-fiel
     if ($('auto-copy').checked) void copyText(generateLine(annotation, precision()), true);
   });
 });
+
+INSERTIONS.forEach((action) => {
+  const button = document.createElement('button');
+  button.type = 'button'; button.className = 'notation-button';
+  button.dataset.notation = action.id;
+  button.textContent = action.label; button.title = action.title;
+  button.setAttribute('aria-label', action.title);
+  button.addEventListener('pointerdown', (event) => event.preventDefault());
+  button.addEventListener('click', () => {
+    const input = $('text-input');
+    // Commit any preceding typing first, so Undo can remove just the insertion.
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    const edit = insertNotation(input.value, input.selectionStart, input.selectionEnd,
+      action.id, $('raw-latex').checked);
+    input.value = edit.text; $('raw-latex').checked = true;
+    updateNotationPreview();
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    renderOverlay();
+    input.focus({ preventScroll: true });
+    input.setSelectionRange(edit.selectionStart, edit.selectionEnd);
+  });
+  $('notation-toolbar').append(button);
+});
+$('text-input').addEventListener('input', () => { updateNotationPreview(); renderOverlay(); });
+$('text-input').addEventListener('change', updateNotationPreview);
+$('raw-latex').addEventListener('change', () => { updateNotationPreview(); renderOverlay(); });
 
 $('undo-button').addEventListener('click', () => {
   const previous = state.undo.pop(); if (!previous) return;

@@ -33,9 +33,62 @@ The coordinate origin is the image’s **top-left corner**. Both axes run from 0
 | Paragraph | Drag text area | `\parafrag[font command]{x}{y}{width fraction}{text}` |
 | Image pin | Click centre | `\pinfrag[angle]{x}{y}{scale}{image path}` |
 
-Paragraphs use the box’s top-left corner and horizontal span; their height follows the text’s typesetting. Plain text labels escape LaTeX special characters; use the raw LaTeX option for mathematical expressions or formatting.
+Paragraphs use the box’s top-left corner and horizontal span; their height follows the text’s typesetting. Plain text labels escape LaTeX special characters; use **Text contains LaTeX** for portable notation or existing raw LaTeX.
 
 `highlightmove` is currently an alias of `highlightfrag`. Whiteout uses the final opaque `whiteout` style in the source file. Any fragment-reveal or removal behaviour is handled by your existing LaTeX-to-Reveal workflow; this editor produces the macro commands.
+
+### Music-analysis labels
+
+The Text, Paragraph, Outlined marker and Filled marker tools now have a
+**notation toolbar** and a **live label preview**. Select text to wrap it in
+superscript/subscript, stacked figures, a scale-degree hat, bold, italic or
+underlining. With no selection, a button inserts an editable placeholder.
+Accidentals and chord symbols insert at the cursor and terminate with `{}`
+so the next letters cannot accidentally become part of a command name.
+
+| Source in the label field | Preview |
+| --- | --- |
+| `V\msup{7}` | V with raised 7 |
+| `C\msub{4}` | C with lowered 4 |
+| `V\msupsub{6}{4}` | 6 above 4 in one column beside V |
+| `F\msharp`, `\mflat{}VII`, `A\mnatural` | Sharp, flat, natural |
+| `\mdegree{3}` | Scale degree with a hat |
+| `vii\msup{\mdim 7}` | Raised diminished symbol and 7 |
+| `ii\msup{\mhalfdim 7}` | Raised half-diminished symbol and 7 |
+| `V\msup{\maug}`, `4\mto{}3` | Augmented plus and motion arrow |
+| `\textbf{V\msup{\msharp 5}}` | Nested bold and raised sharp-5 |
+
+The standard `\textsuperscript` / `\textsubscript` names also preview.
+These are the **same text-mode commands** used by the updated
+[`format-exchange` pipeline](https://github.com/AdrianArtacho/format-exchange/blob/main/docs/music-notation.md).
+Do not put them inside `$...$`.
+
+Buttons enable **Text contains LaTeX** automatically; existing plain text is
+escaped once when switching via a button. When typing/pasting commands by
+hand, check that box yourself. With it unchecked, commands are deliberately
+literal text, not notation. Unknown commands or unfinished braces produce a
+preview warning, but remain unchanged in export. No full TeX interpreter or
+HTML supplied in a label is executed.
+
+The canvas renders formatted text for **all four label types**. Marker circles
+fit the rendered label rather than the length of its LaTeX source. Paragraph
+font-size selection affects the preview. Typing previews immediately; leaving
+the field applies the edit to the annotation and its generated code. Toolbar
+insertions apply immediately and can be undone. Copy, `.tex` download and full
+block export retain the original commands, never the preview HTML.
+
+**Overleaf:** copy the shared
+[`musicnotation.tex`](https://github.com/AdrianArtacho/ltx_snippets/blob/main/ltx/reveal/musicnotation.tex)
+into your project and load it after your existing `prefix.tex` and
+`imageannot.tex` imports, before `\begin{document}`. For the usual layout:
+
+```latex
+\input{META/ltx/reveal/musicnotation.tex}
+```
+
+Use your actual path if different. The updated scriptum and handout builders
+already load their bundled definitions; using this helper does not synchronize
+Overleaf or update other repositories automatically.
 
 ### Link directly to an image
 
@@ -63,7 +116,7 @@ A snapshot of the definitions used to build this app is included in [`reference/
 
 ### Preview limits
 
-Coordinates, endpoints, bounding boxes and rotation are calculated from the displayed image. The preview is a drawing aid rather than a TeX renderer: fonts, mathematical text, arbitrary TikZ styles, paragraph wrapping and external pin images can differ from the PDF. Line thickness, rounded corners, arrowheads, rule end caps, text size and pin width use physical TeX units, so their on-screen size is approximate. `\pinfrag` sets image width to `scale × 0.9 cm`; paragraph width is a fraction of `\textwidth`. Check the compiled PDF for final typography and physical sizes.
+Coordinates, endpoints, bounding boxes and rotation are calculated from the displayed image. The preview is a drawing aid rather than a TeX renderer: fonts, unsupported mathematics, arbitrary TikZ styles, paragraph wrapping and external pin images can differ from the PDF. The portable notation subset above is rendered, but bare `^`, `_`, general `$...$` math, double accidentals and microtonal symbols are not interpreted. Line thickness, rounded corners, arrowheads, rule end caps, text size and pin width use physical TeX units, so their on-screen size is approximate. `\pinfrag` sets image width to `scale × 0.9 cm`; paragraph width is a fraction of `\textwidth`. Check the compiled PDF for final typography and physical sizes.
 
 ## Privacy
 
@@ -91,9 +144,10 @@ For the optional browser integration checks, install Playwright locally:
 npm install --no-save --package-lock=false playwright
 npx playwright install chromium
 node tests/browser.mjs
+node tests/notation.browser.mjs
 ```
 
-These checks cover drawing, editing, undo, clipboard fallbacks, export, image loading and mobile layout. The app itself has no runtime dependencies.
+These checks cover drawing, editing, undo, clipboard fallbacks, export, image loading and mobile layout, plus selection-based notation insertion, live nested previews, both marker styles, paragraphs, unchanged LaTeX export and safe handling of malformed or HTML-like input. Notation browser checks save desktop and mobile screenshots in `test-results/`. The app itself has no runtime dependencies.
 
 ## GitHub Pages
 
