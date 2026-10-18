@@ -6,7 +6,7 @@
   <meta name="description" content="Draw on an image and copy precise LaTeX annotation commands for Overleaf and Reveal slides.">
   <meta name="theme-color" content="#f7f8fa">
   <title>imageannot — draw, copy, annotate</title>
-  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./styles.css?v=music-notation-1">
 </head>
 <body>
   <div class="app-shell">
@@ -69,11 +69,26 @@
             <div class="field" data-field="color"><label for="color-input">TikZ color</label><input id="color-input" type="text" value="red" list="tikz-colors" autocomplete="off" spellcheck="false"><datalist id="tikz-colors"><option value="red"><option value="blue"><option value="yellow"><option value="green"><option value="orange"><option value="purple"><option value="black"><option value="white"><option value="red!50"><option value="blue!30"></datalist><p class="field-hint">Names and mixtures, e.g. <code>blue!30</code>.</p></div>
             <div class="field" data-field="rotation"><label for="rotation-input">Rotation <span class="field-unit">degrees</span></label><input id="rotation-input" type="number" value="0" step="any"></div>
             <div class="field" data-field="opacity"><label for="opacity-input">Fill opacity <span class="field-unit">0–1</span></label><input id="opacity-input" type="number" value="0.2" min="0" max="1" step="any"></div>
-            <div class="field" data-field="text"><label for="text-input">Label text</label><textarea id="text-input" rows="2" placeholder="e.g. First subject" spellcheck="true"></textarea><label class="check-control compact-check" for="raw-latex"><input id="raw-latex" type="checkbox"><span>Text contains LaTeX</span></label></div>
+            <div class="field" data-field="text">
+              <label for="text-input">Label text</label>
+              <textarea id="text-input" rows="3" placeholder="e.g. V\msup{7}" spellcheck="false" aria-describedby="notation-hint"></textarea>
+              <div id="notation-toolbar" class="notation-toolbar" role="group" aria-label="Insert music notation"></div>
+              <label class="check-control compact-check" for="raw-latex"><input id="raw-latex" type="checkbox"><span>Text contains LaTeX</span></label>
+              <p id="notation-hint" class="field-hint">Select text to format it, or place the cursor to insert a symbol. Buttons enable LaTeX mode.</p>
+              <div class="notation-preview-box"><span class="notation-preview-title">Label preview</span><div id="notation-preview" class="notation-render" aria-label="Formatted label preview"></div></div>
+              <p id="notation-warning" class="notation-warning" role="status" hidden></p>
+              <details class="notation-help"><summary>Notation &amp; Overleaf setup</summary>
+                <p>Use text-mode commands, without <code>$...$</code>. The canvas and exported LaTeX use the same labels. Stack figures with <code>V\msupsub{6}{4}</code>; use <code>ii\msup{\mhalfdim 7}</code> for a raised half-diminished seventh.</p>
+                <p>In Overleaf, load <a href="https://github.com/AdrianArtacho/ltx_snippets/blob/main/ltx/reveal/musicnotation.tex" target="_blank" rel="noopener noreferrer">musicnotation.tex</a> after your existing <code>prefix.tex</code> and <code>imageannot.tex</code> imports:</p>
+                <pre><code>\input{META/ltx/reveal/musicnotation.tex}</code></pre>
+                <p>Use your actual project path. The updated scriptum and handout builders already load their copy. <a href="https://github.com/AdrianArtacho/format-exchange/blob/main/docs/music-notation.md" target="_blank" rel="noopener noreferrer">Full pipeline guide ↗</a></p>
+                <p>Unsupported commands stay literal in the preview and unchanged in export. This is not a general TeX renderer; final font metrics may differ.</p>
+              </details>
+            </div>
             <div class="field" data-field="scale"><label for="scale-input">Text / pin scale</label><input id="scale-input" type="number" value="1" min="0.01" step="any"></div>
             <div class="field" data-field="width"><label for="width-input">Paragraph width <span class="field-unit">fraction</span></label><input id="width-input" type="number" value="0.3" min="0.001" max="1" step="any"><p class="field-hint">Relative to the LaTeX text width.</p></div>
             <div class="field" data-field="pinPath"><label for="pin-path-input">Pin image path</label><input id="pin-path-input" type="text" value="pin.png" placeholder="pin.png" spellcheck="false"></div>
-            <div class="field" data-field="fontSize"><label for="font-size-input">Paragraph font size</label><select id="font-size-input"><option value="normalsize">Normal · \normalsize</option><option value="small">Small · \small</option><option value="footnotesize">Footnote · \footnotesize</option><option value="scriptsize">Script · \scriptsize</option><option value="tiny">Tiny · \tiny</option><option value="large">Large · \large</option><option value="Large">Larger · \Large</option></select></div>
+            <div class="field" data-field="fontSize"><label for="font-size-input">Paragraph font size</label><select id="font-size-input"><option value="normalsize">Normal · \normalsize</option><option value="small">Small · \small</option><option value="footnotesize">Footnote · \footnotesize</option><option value="scriptsize">Script · \scriptsize</option><option value="tiny">Tiny · \tiny</option><option value="large">Large · \large</option><option value="Large">Larger · \Large</option><option value="LARGE">Very large · \LARGE</option><option value="huge">Huge · \huge</option><option value="Huge">Largest · \Huge</option></select></div>
           </div>
         </section>
         <section class="inspector-section export-settings" aria-labelledby="export-title"><h3 id="export-title">Document settings</h3><div class="field"><label for="image-path">Image path in Overleaf</label><input id="image-path" type="text" value="score.png" spellcheck="false"><p class="field-hint">Used in the full <code>\imageannot</code> block.</p></div><div class="field precision-field"><label for="precision-select">Coordinate precision</label><select id="precision-select"><option value="3">3 decimals</option><option value="4" selected>4 decimals</option><option value="5">5 decimals</option><option value="6">6 decimals</option></select></div></section>
@@ -84,6 +99,6 @@
     <details id="help" class="help-panel"><summary><span class="help-symbol" aria-hidden="true">?</span> A quick guide to imageannot <span class="details-chevron" aria-hidden="true">⌄</span></summary><div class="help-content"><div><h3>Coordinates that match your macros</h3><p>The top left is <code>(0, 0)</code>; the bottom right is <code>(1, 1)</code>. Both axes are normalized, and y increases downward. Zooming changes your view, never your coordinates.</p></div><div><h3>Draw, then paste</h3><p>Choose a fragment and drag to draw. For labels and markers, click their position. The result appears below the image and is copied automatically when your browser allows it.</p></div><div><h3>Cover and reveal</h3><p>Choose Whiteout to produce <code>\highlightfrag[whiteout]</code>: an opaque white rectangle. Its Reveal animation follows the definitions in your LaTeX project.</p></div><div><h3>Images and previews</h3><p>Use a direct image URL, drop a file, or share a link with <code>?image=IMAGE_URL</code>. Local files stay in your browser. Typography and TikZ previews are approximate; the exported command uses your original macros.</p></div></div></details>
     <footer class="app-footer"><p>Made for the space between a score and a slide.</p><div><a href="https://github.com/AdrianArtacho/imageannot" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a><a href="https://github.com/AdrianArtacho/ltx_snippets/blob/main/ltx/reveal/imageannot.tex" target="_blank" rel="noopener noreferrer">LaTeX definitions <span aria-hidden="true">↗</span></a><span>Adrián Artacho</span></div></footer>
   </div>
-  <script type="module" src="./app.js"></script>
+  <script type="module" src="./app.js?v=music-notation-1"></script>
 </body>
 </html>
